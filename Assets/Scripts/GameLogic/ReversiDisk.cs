@@ -26,4 +26,10 @@ public class ReversiDisk : UdonSharpBehaviour
         Color = initialColor;
         transform.parent = logic.transform;
     }
+
+    public override void Interact()
+    {
+        Color = !Color;
+    }
+
 }
