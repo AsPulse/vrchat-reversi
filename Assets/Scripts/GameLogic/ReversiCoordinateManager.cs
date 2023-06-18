@@ -137,7 +137,7 @@ public class ReversiCoordinateManager : UdonSharpBehaviour {
 
         ReversiCellStatus status = Map[pos];
         if (status == ReversiCellStatus.NONE) return new int[0];
-        if (status != Turn) return index;
+        if (status == Turn) return index;
 
         int[] result = new int[index.Length + 1];
         index.CopyTo(result, 0);

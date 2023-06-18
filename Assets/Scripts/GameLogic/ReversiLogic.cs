@@ -1,4 +1,5 @@
-﻿    
+﻿
+using System;
 using System.Linq;
 using tutinoco;
 using UdonSharp;
@@ -56,11 +57,12 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
     public void SendBoardStateSync()
     {
         ClearJoinSync();
-        SendEvent("StateSync", Coord.Encode(), JoinSync.Latest);
+        SendEvent("StateSync", Coord.Encode());
     }
 
     void SyncBoard()
     {
+        DateTime start = DateTime.Now;
 
         for (int y = 0; y < Coord.HEIGHT; y++)
         {
@@ -120,6 +122,9 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
                 PlaceableDiskInstances[Coord.CoordinateToIndex(x, y)] = generated;
             }
         }
+        DateTime end = DateTime.Now;
+
+        Debug.LogFormat("State synced ({0}ms)", (end - start).TotalMilliseconds);
     }
 
     public void Flip(int index)
