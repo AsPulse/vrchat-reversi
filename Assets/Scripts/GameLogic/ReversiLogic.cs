@@ -227,7 +227,7 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
         }
         DateTime end = DateTime.Now;
 
-        Debug.LogFormat("[{2}ms] FlipChain, Remain-FlipTasks = {1}", FlipTasks.Length, (end-start).TotalMilliseconds);
+        Debug.LogFormat("[{1}ms] FlipChain, Remain-FlipTasks = {0}", FlipTasks.Length, (end-start).TotalMilliseconds);
 
 
     }
