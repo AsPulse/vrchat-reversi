@@ -94,7 +94,6 @@ public class RadixConverter : UdonSharpBehaviour
             );
             answer = Add(answer, thisBase, baseTo);
         }
-        Debug.Log(Encode(answer));
 
         string result = "";
         for(int i = answer.Length - 1; i >= 0; i--)

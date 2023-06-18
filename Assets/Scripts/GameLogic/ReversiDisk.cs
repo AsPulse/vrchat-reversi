@@ -26,9 +26,4 @@ public class ReversiDisk : UdonSharpBehaviour
         transform.Translate(logic.transform.position + position, Space.World);
     }
 
-    public override void Interact()
-    {
-        Color = !Color;
-    }
-
 }

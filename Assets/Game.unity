@@ -290,6 +290,8 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 583688128}
   DiskPrefab: {fileID: 558569284825166439, guid: 7bde717bfc4e13d40b2d67a59f881523,
     type: 3}
+  PlaceableDiskPrefab: {fileID: 558569284825166439, guid: d4f4ff21e18f415478c3a5b03179b488,
+    type: 3}
 --- !u!114 &583688131
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -772,7 +774,7 @@ PrefabInstance:
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: DynamicPrefabs.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
@@ -797,6 +799,12 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
+      propertyPath: DynamicPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 558569284825166439, guid: d4f4ff21e18f415478c3a5b03179b488,
+        type: 3}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
       propertyPath: DynamicMaterials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 36d3e1c7416d5eb4aa8aa45bb4554409, type: 2}
@@ -804,14 +812,12 @@ PrefabInstance:
         type: 3}
       propertyPath: DynamicMaterials.Array.data[1]
       value: 
-      objectReference: {fileID: -6478536213147159724, guid: 474f6d1d1906fc640a05ee113fd8e0d7,
-        type: 3}
+      objectReference: {fileID: 2100000, guid: 43aa2b5351209e54b858246ffe128e44, type: 2}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: DynamicMaterials.Array.data[2]
       value: 
-      objectReference: {fileID: -3846018093981099296, guid: 474f6d1d1906fc640a05ee113fd8e0d7,
-        type: 3}
+      objectReference: {fileID: 2100000, guid: 05b036379a33b564da95a9d89054f46e, type: 2}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[0].gameObject

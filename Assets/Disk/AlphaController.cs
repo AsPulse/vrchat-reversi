@@ -33,7 +33,6 @@ public class AlphaController : UdonSharpBehaviour
         float transparency = PositionConstraint.weight;
         for (int i = 0; i < Materials.Length; i++)
         {
-             
             if (PresentTransparency[i] == transparency) return;
             Color c = Materials[i].color;
             c.a = transparency;
