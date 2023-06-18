@@ -18,6 +18,9 @@ public class ReversiCoordinateManager : UdonSharpBehaviour {
     [SerializeField]
     private Vector3 DiskSize;
 
+    [SerializeField]
+    private RadixConverter RadixConverter;
+
     public void SetUp(GameObject diskPrefab)
     {
         Map = new ReversiCellStatus[WIDTH * HEIGHT];
@@ -29,6 +32,20 @@ public class ReversiCoordinateManager : UdonSharpBehaviour {
         SetCell(4, 3, ReversiCellStatus.WHITE);
         SetCell(3, 4, ReversiCellStatus.WHITE);
         SetCell(4, 4, ReversiCellStatus.BLACK);
+
+        string a = "2" +
+            "00000000" +
+            "00000000" +
+            "00000000" +
+            "00012000" +
+            "00021000" +
+            "00000000" +
+            "00000000" +
+            "00000000";
+        string b = RadixConverter.Convert(a, 3, 62);
+        string c = RadixConverter.Convert(b, 62, 3);
+        Debug.Log(a == c);
+
     }
 
     public Vector3 GetCellVector(int x, int y)
@@ -53,5 +70,6 @@ public class ReversiCoordinateManager : UdonSharpBehaviour {
     {
         Map[CoordinateToIndex(x, y)] = cell;
     }
+
 
 }
