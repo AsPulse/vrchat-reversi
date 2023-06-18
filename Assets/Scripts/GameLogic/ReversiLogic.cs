@@ -1,9 +1,12 @@
 ﻿
+using Microsoft.Win32;
 using System;
 using System.Linq;
+using System.Reflection;
 using tutinoco;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UIElements;
 using VRC.SDKBase;
 using VRC.Udon;
@@ -22,12 +25,16 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
     private GameObject[] DiskInstances;
     private GameObject[] PlaceableDiskInstances;
 
+    private int[][] FlipTasks;
+
+    private float timer = -1;
 
     void Start()
     {
         SimpleNetworkInit();
         Coord = GetComponent<ReversiCoordinateManager>();
         Coord.SetUp(DiskPrefab);
+        FlipTasks = new int[0][];
 
         DiskInstances = new GameObject[Coord.WIDTH * Coord.HEIGHT];
         for(int i = 0; i < DiskInstances.Length; i++)
@@ -52,12 +59,26 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
             SyncBoard();
             return;
         }
+
+        if(name == "Flip")
+        {
+            ProcessFlip(GetInt(value));
+        }
     }
+
 
     public void SendBoardStateSync()
     {
         ClearJoinSync();
         SendEvent("StateSync", Coord.Encode());
+    }
+
+    private void AddDisk(int x, int y, ReversiCellStatus status)
+    {
+        if (status == ReversiCellStatus.NONE) return;
+        GameObject generated = Instantiate(DiskPrefab);
+        generated.GetComponent<ReversiDisk>().Setup(gameObject, Coord.GetCellVector(x, y), status == ReversiCellStatus.BLACK);
+        DiskInstances[Coord.CoordinateToIndex(x, y)] = generated;
     }
 
     void SyncBoard()
@@ -72,10 +93,7 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
                 ReversiCellStatus status = Coord.GetCell(x, y);
                 if (target == null)
                 {
-                    if (status == ReversiCellStatus.NONE) continue;
-                    GameObject generated = Instantiate(DiskPrefab);
-                    generated.GetComponent<ReversiDisk>().Setup(gameObject, Coord.GetCellVector(x, y), status == ReversiCellStatus.BLACK);
-                    DiskInstances[Coord.CoordinateToIndex(x, y)] = generated;
+                    AddDisk(x, y, status);
                 } else {   
                     if (status == ReversiCellStatus.NONE)
                     {
@@ -129,6 +147,104 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
 
     public void Flip(int index)
     {
+        SendEvent("Flip", index, JoinSync.Logging);
+    }
+
+    private void ProcessFlip(int index)
+    {
+        int[][] flippable = Coord.GetToBeFlipped(index);
+        if (!Coord.IsFlippable(flippable)) return;
+
+        for (int i = 0; i < PlaceableDiskInstances.Length; i++)
+        {
+            Destroy(PlaceableDiskInstances[i]);
+            PlaceableDiskInstances[i] = null;
+        }
+
+        int max = 0;
+        for (int i = 0; i < flippable.Length; i++)
+        {
+            max = Math.Max(max, flippable[i].Length);
+        }
+
+        int[][] newFlipTasks = new int[FlipTasks.Length + max][];
+        FlipTasks.CopyTo(newFlipTasks, 0);
+
+        for (int i = FlipTasks.Length; i < newFlipTasks.Length; i++)
+        {
+            int length = 0;
+            for (int k = 0; k < flippable.Length; k++)
+            {
+                if (flippable[k].Length > (i - FlipTasks.Length)) length++;
+            }
+
+            newFlipTasks[i] = new int[length];
+            int elements = 0;
+            for (int k = 0; k < flippable.Length; k++)
+            {
+                if (flippable[k].Length <= (i - FlipTasks.Length)) continue;
+                newFlipTasks[i][elements++] = flippable[k][i - FlipTasks.Length];
+            }
+        }
+
+        FlipTasks = newFlipTasks;
+        Coord.Map[index] = Coord.Turn;
+        int[] xy = Coord.IndexToCoordinate(index);
+        AddDisk(xy[0], xy[1], Coord.Turn);
+        Coord.Turn = Coord.Turn == ReversiCellStatus.BLACK ? ReversiCellStatus.WHITE : ReversiCellStatus.BLACK;
+
+        if (timer >= 0) return;
+        timer = 1;
+    }
+
+    public void FlipChain()
+    {
+        DateTime start = DateTime.Now;
+        int[] thisFlips = FlipTasks[0];
+        int[][] nextFlips = new int[FlipTasks.Length - 1][];
+        for(int i = 0; i < nextFlips.Length; i++)
+        {
+            nextFlips[i] = FlipTasks[i + 1];
+        }
+        FlipTasks = nextFlips;
+
+
+        for(int i = 0; i < thisFlips.Length; i++)
+        {
+            ReversiCellStatus flipped = Coord.Map[thisFlips[i]] == ReversiCellStatus.BLACK ? ReversiCellStatus.WHITE : ReversiCellStatus.BLACK;
+            Coord.Map[thisFlips[i]] = flipped;
+            GameObject gameObject = DiskInstances[thisFlips[i]];
+            if (gameObject == null) continue;
+            gameObject.GetComponent<ReversiDisk>().Color = flipped == ReversiCellStatus.BLACK;
+        }
+
+        if(nextFlips.Length > 0)
+        {
+            timer = 0;
+        } else
+        {
+            if (Networking.LocalPlayer.isMaster) SendCustomEventDelayedSeconds(nameof(SendBoardStateSync), 1.2f);
+        }
+        DateTime end = DateTime.Now;
+
+        Debug.LogFormat("[{2}ms] FlipChain, Remain-FlipTasks = {1}", FlipTasks.Length, (end-start).TotalMilliseconds);
+
+
+    }
+
+    private void Update()
+    {
+        if(timer >= 0)
+        {
+            timer += Time.deltaTime;
+        }
+
+        if(timer > 0.15f)
+        {
+            timer = -1;
+            FlipChain();
+        }
+
 
     }
 }

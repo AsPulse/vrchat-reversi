@@ -50,10 +50,19 @@ public class ReversiCoordinateManager : UdonSharpBehaviour {
         return y * WIDTH + x;
     }
 
-    public int MovedIndex(int index, int deltaX, int deltaY)
+    public int[] IndexToCoordinate(int index)
     {
         int x = index % HEIGHT;
         int y = (index - x) / WIDTH;
+
+        return new int[] { x, y };
+    }
+
+    public int MovedIndex(int index, int deltaX, int deltaY)
+    {
+        int[] coord = IndexToCoordinate(index);
+        int x = coord[0];
+        int y = coord[1];
         x += deltaX;
         y += deltaY;
         if (x < 0) return -1;
