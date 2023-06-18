@@ -16,7 +16,7 @@ public class RadixConverter : UdonSharpBehaviour
         int[] shorter = swap ? left : right;
         int adding = 0;
         int i = 0;
-        while(adding > 0 || i < shorter.Length)
+        while(adding > 0 || i < longer.Length)
         {
             if(longer.Length <= i)
             {
@@ -38,19 +38,13 @@ public class RadixConverter : UdonSharpBehaviour
 
     private int[] Multiple(int[] left, int right, int leftBase)
     {
-        //int[] answer = Clone(left);
-        //for(int i = 0; i < answer.Length; i++)
-        //{
-        //    answer[i] *= right;
-        //}
-        //return Add(new int[] { 0 }, answer, leftBase);
-
-        int[] answer = new int[] { 0 };
-        for(int i = 0; i < right; i++)
+        int[] answer = Clone(left);
+        for (int i = 0; i < answer.Length; i++)
         {
-            answer = Add(answer, left, leftBase);
+            answer[i] = answer[i] * right;
         }
-        return answer;
+        return Add(new int[] { 0 }, answer, leftBase);
+
     }
 
     private int[] Clone(int[] target)
@@ -100,6 +94,7 @@ public class RadixConverter : UdonSharpBehaviour
             );
             answer = Add(answer, thisBase, baseTo);
         }
+        Debug.Log(Encode(answer));
 
         string result = "";
         for(int i = answer.Length - 1; i >= 0; i--)
