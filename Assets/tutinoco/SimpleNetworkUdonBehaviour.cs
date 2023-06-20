@@ -140,8 +140,18 @@ namespace tutinoco
             string[] data = c.Substring(8).Split('･');
             foreach (string cmd in data)
             {
+                if(cmd.Length < 2)
+                {
+                    Debug.LogWarningFormat("[SimpleNetworkUdonBehavior] cmd '{0}' has length less than 2. Aboring...", cmd);
+                    continue;
+                }
                 VRCPlayerApi player = int.TryParse(cmd.Substring(0, 2), out int num) ? VRCPlayerApi.GetPlayerById(int.Parse(cmd.Substring(0, 2))) : null;
                 int find = cmd.IndexOf(":");
+                if (find == -1)
+                {
+                    Debug.LogWarningFormat("[SimpleNetworkUdonBehavior] cmd '{0}' has no ':' character. Aboring...", cmd);
+                    continue;
+                }
                 string name = cmd.Substring(2, find - 2);
                 if (name == "__init__") return;
                 string value = cmd.Substring(find + 1);

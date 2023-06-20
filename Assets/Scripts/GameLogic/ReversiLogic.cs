@@ -29,6 +29,9 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
 
     private float timer = -1;
 
+    private bool IsSyncing = true;
+    private string SyncingRequired = null; 
+
     void Start()
     {
         SimpleNetworkInit();
@@ -51,10 +54,22 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
         SyncBoard();
     }
 
+    public override void OnPlayerJoined(VRCPlayerApi player)
+    {
+        if (!Networking.LocalPlayer.isMaster) return;
+        SendCustomEventDelayedSeconds(nameof(SendBoardStateSync), 1.5f);
+    }
+
+
     public override void ReceiveEvent(string name, string value)
     {
         if(name == "StateSync")
         {
+            if (IsSyncing)
+            {
+                SyncingRequired = value;
+                return;
+            }
             Coord.Decode(value);
             SyncBoard();
             return;
@@ -83,6 +98,13 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
 
     void SyncBoard()
     {
+        IsSyncing = true;
+        if(SyncingRequired != null)
+        {
+            Coord.Decode(SyncingRequired);
+            SyncingRequired = null;
+        }
+
         DateTime start = DateTime.Now;
 
         for (int y = 0; y < Coord.HEIGHT; y++)
@@ -130,7 +152,7 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
                     }
                     continue;
                 }
-                if(target != null && target.GetComponent<PlaceableReversiDisk>().Color != Coord.Turn)
+                if(target != null)
                 {
                     Destroy(target);
                     target = null;
@@ -143,6 +165,15 @@ public class ReversiLogic : SimpleNetworkUdonBehaviour
         DateTime end = DateTime.Now;
 
         Debug.LogFormat("State synced ({0}ms)", (end - start).TotalMilliseconds);
+
+        if(SyncingRequired != null)
+        {
+            SendBoardStateSync();
+            return;
+        } else
+        {
+            IsSyncing = false;
+        }
     }
 
     public void Flip(int index)
